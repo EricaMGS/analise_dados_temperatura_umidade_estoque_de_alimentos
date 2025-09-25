@@ -30,19 +30,11 @@ file_path = 'dados_pi4_13a19set.txt'
 def load_and_preprocess_data(file_path):
     try:
         # Ler o arquivo de texto, ignorando as duas primeiras linhas de metadados
-        # e especificando a codificação correta para tratar o Byte Order Mark (BOM)
         df = pd.read_csv(file_path, sep='\t', skiprows=2, encoding='utf-16')
-
-        # Renomear as colunas para facilitar o uso
         df.columns = ['data', 'temperatura', 'umidade', 'ponto_orvalho', 'vpd']
-
-        # Converter a coluna 'data' para o tipo datetime
         df['data'] = pd.to_datetime(df['data'], format='%m/%d/%Y %H:%M')
-
-        # Substituir vírgula por ponto para converter para numérico
         df['temperatura'] = df['temperatura'].str.replace(',', '.').astype(float)
         df['umidade'] = df['umidade'].str.replace(',', '.').astype(float)
-
         return df
 
     except FileNotFoundError:
@@ -54,7 +46,7 @@ df = load_and_preprocess_data(file_path)
 if df is not None:
     st.write("Dados carregados com sucesso. Primeiras 5 linhas:")
     st.dataframe(df.head())
-
+    
     st.write("Informações do DataFrame:")
     st.write(df.info())
 
@@ -69,26 +61,23 @@ if st.button("Gerar Gráfico de Linhas"):
     ax.set_title("Dados de temperatura e umidade no estoque")
     ax.set_xlabel("Data")
     ax.set_ylabel("Valor")
+    # Usa st.pyplot para renderizar o gráfico, permitindo que ele se adapte ao layout do Streamlit
     st.pyplot(fig)
 
 # --- Seção de Previsão de Temperatura (Análise Preditiva) ---
 st.header("3. Previsão de Temperatura")
 st.markdown("Um modelo de regressão linear prevê a temperatura com base no tempo.")
 
-# Criar variável numérica de tempo a partir do índice, como o número de horas desde o início da coleta
 df["hora"] = np.arange(len(df))
 
-# Divisão dos dados em treino e teste
 X = df[["hora"]]
 y = df["temperatura"]
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, shuffle=False)
 
-# Treinamento do modelo
 model = LinearRegression()
 model.fit(X_train, y_train)
 
-# Previsões
 preds = model.predict(X_test)
 
 fig_pred, ax_pred = plt.subplots(figsize=(12, 5))
@@ -107,14 +96,12 @@ st.markdown("""
 - **Inadequado**: Temperatura $> 25$ ºC ou Umidade $\\ge 70$ %
 """)
 
-# Função de classificação
 def classificar_condicao(temp, umid):
     if temp < 25 and umid < 70:
         return "Adequado"
     else:
         return "Inadequado"
 
-# Aplicar a classificação no DataFrame
 df['condicao_armazenamento'] = df.apply(lambda row: classificar_condicao(row['temperatura'], row['umidade']), axis=1)
 st.write("Tabela com a classificação de armazenamento:")
 st.dataframe(df[['data', 'temperatura', 'umidade', 'condicao_armazenamento']].head())
@@ -122,11 +109,11 @@ st.dataframe(df[['data', 'temperatura', 'umidade', 'condicao_armazenamento']].he
 # --- Seção de Detecção de Anomalias ---
 st.header("5. Detecção de Anomalias")
 
+# Usando colunas para o layout responsivo, como você já fez.
 col1, col2 = st.columns(2)
 
 with col1:
     st.subheader("Anomalias de Temperatura")
-    st.markdown("O boxplot de temperatura ajuda a identificar valores fora do padrão.")
     fig_temp_boxplot, ax_temp_boxplot = plt.subplots(figsize=(8, 6))
     ax_temp_boxplot.boxplot(df['temperatura'])
     ax_temp_boxplot.set_title('Boxplot da Temperatura')
@@ -136,7 +123,6 @@ with col1:
 
 with col2:
     st.subheader("Anomalias de Umidade")
-    st.markdown("O boxplot de umidade ajuda a identificar valores fora do padrão.")
     fig_umid_boxplot, ax_umid_boxplot = plt.subplots(figsize=(8, 6))
     ax_umid_boxplot.boxplot(df['umidade'])
     ax_umid_boxplot.set_title('Boxplot da Umidade')
