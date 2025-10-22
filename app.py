@@ -248,7 +248,7 @@ if df is not None and not df.empty:
         contagem_df.index.name = 'Condição'
         contagem_df = contagem_df.reset_index()
         
-       contagem_df['Cor'] = contagem_df['Condição'].map({'Adequado':'green', 'Inadequado':'red'})
+       contagem_df['Cor'] = contagem_df['Condição'].map({'Adequado':'#7ED321', 'Inadequado':'#FF5733'})
         
         st.bar_chart(
             contagem_df, 
@@ -304,5 +304,6 @@ if df is not None and not df.empty:
     - A análise de **anomalias** por meio de boxplots pode revelar falhas em equipamentos ou condições ambientais extremas.
     - Se a contagem de períodos "Inadequado" for alta, a **compra de um ar condicionado** ou melhorias na ventilação podem ser justificadas para manter a qualidade dos produtos.
     """)
+
 
 
